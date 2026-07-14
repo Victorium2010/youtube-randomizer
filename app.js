@@ -2,13 +2,26 @@ const API_KEY = "AIzaSyAPCkiqKnclLLTows-QJvPWEnvFC3_g0dM";
 let channels = JSON.parse(localStorage.getItem("channels")) || [];
 let watched = JSON.parse(localStorage.getItem("watched")) || [];
 
-function addChannel(){
+
+async function addChannel(){
 
     let input = document.getElementById("channelInput").value;
 
-    if(input){
+    if(!input) return;
 
-        channels.push(input);
+    let username = input.split("@")[1];
+
+    let response = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&part=snippet&type=channel&q=${username}`
+    );
+
+    let data = await response.json();
+
+    if(data.items.length > 0){
+
+        let channelId = data.items[0].id.channelId;
+
+        channels.push(channelId);
 
         localStorage.setItem(
             "channels",
@@ -18,9 +31,16 @@ function addChannel(){
         document.getElementById("channelInput").value = "";
 
         showChannels();
-    }
-}
 
+        alert("Canal añadido correctamente");
+
+    }else{
+
+        alert("No se encontró el canal");
+
+    }
+
+}
 
 function showChannels(){
 
