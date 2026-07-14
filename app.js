@@ -1,3 +1,4 @@
+const API_KEY = "AIzaSyAPCkiqKnclLLTows-QJvPWEnvFC3_g0dM";
 let channels = JSON.parse(localStorage.getItem("channels")) || [];
 let watched = JSON.parse(localStorage.getItem("watched")) || [];
 
@@ -38,11 +39,50 @@ function showChannels(){
 }
 
 
-function randomVideo(){
+async function randomVideo(){
 
-    document.getElementById("result").innerHTML =
-    "⏳ Preparando el selector de vídeos...";
+    let result = document.getElementById("result");
 
+    if(channels.length === 0){
+        result.innerHTML = "Añade primero un canal";
+        return;
+    }
+
+    result.innerHTML = "⏳ Buscando vídeos...";
+
+    let videos = [];
+
+    for(let channel of channels){
+
+        let username = channel.split("@")[1];
+
+        let response = await fetch(
+            `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&part=snippet&channelId=${username}&maxResults=10&order=date`
+        );
+
+        let data = await response.json();
+
+        if(data.items){
+            videos.push(...data.items);
+        }
+    }
+
+    if(videos.length === 0){
+        result.innerHTML = "No se encontraron vídeos";
+        return;
+    }
+
+    let video = videos[Math.floor(Math.random()*videos.length)];
+
+    let id = video.id.videoId;
+
+    result.innerHTML = `
+    <h3>${video.snippet.title}</h3>
+    <iframe width="560" height="315"
+    src="https://www.youtube.com/embed/${id}"
+    allowfullscreen>
+    </iframe>
+    `;
 }
 
 
