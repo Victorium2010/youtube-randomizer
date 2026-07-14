@@ -14,6 +14,50 @@ async function addChannel(){
         return;
     }
 
+    let query = input;
+
+    try{
+
+        let response = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&part=snippet&type=channel&q=${encodeURIComponent(query)}`
+        );
+
+        let data = await response.json();
+
+        if(data.items && data.items.length > 0){
+
+            let channel = data.items[0];
+
+            let channelId = channel.id.channelId;
+
+            if(!channels.includes(channelId)){
+
+                channels.push(channelId);
+                saveChannels();
+
+            }
+
+            document.getElementById("channelInput").value = "";
+
+            showChannels();
+
+            alert("Canal añadido correctamente");
+
+        }else{
+
+            alert("No se encontró el canal");
+
+        }
+
+    }catch(error){
+
+        console.log(error);
+        alert("Error conectando con YouTube");
+
+    }
+
+}
+
     let username = input.split("@")[1];
 
     if(!username){
